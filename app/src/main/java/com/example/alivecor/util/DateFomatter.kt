@@ -1,5 +1,8 @@
 package com.example.alivecor.util
 
+import android.annotation.SuppressLint
+import java.time.LocalDate
+import java.time.Period
 import java.util.*
 
 class DateFomatter {
@@ -36,6 +39,21 @@ class DateFomatter {
             val ageInt = age
             return ageInt.toString()
         }
+
+        @SuppressLint("NewApi")
+        fun getUserAge(year: Int, month: Int, day: Int) : String{
+            val today: LocalDate = LocalDate.now()
+            val birthday: LocalDate = LocalDate.of(year, month, day)
+
+            val period: Period = Period.between(birthday, today)
+
+            val age = period.getYears().toString() + " Yrs " +
+                        period.getMonths().toString() + " Months " +
+                        period.getDays().toString() + " Days"
+
+            return age
+        }
+
     }
 
 }

@@ -4,7 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -72,15 +75,16 @@ class UserDetails1 : Fragment() , View.OnClickListener{
                 val monthSelected = mMonthSpinner.getSelectedItemPosition() + 1
                 val day = mDateSpinner.getSelectedItem().toString()
 
-                val age = DateFomatter.getAge(
+                val age = DateFomatter.getUserAge(
                     myearSelected.toInt(),
                     monthSelected.toString().toInt(),
                     day.toInt()
                 )
+
                 val dataClass = Userdata(firstName.text.toString(),lastName.text.toString(),age)
 
                 sharedViewModel!!.setData(dataClass)
-                navController!!.navigate(R.id.action_userDetails1_to_userDetails2)
+                navController.navigate(R.id.action_userDetails1_to_userDetails2)
             }
 
         }
@@ -92,7 +96,7 @@ class UserDetails1 : Fragment() , View.OnClickListener{
         navController!!.navigate(R.id.action_userDetails1_to_userDetails2)
     }
 
-    fun setInitialValues(){
+    private fun setInitialValues(){
         fillDateSpinner()
         fillMonthSpinner()
         fillYearSpinner()
@@ -115,53 +119,22 @@ class UserDetails1 : Fragment() , View.OnClickListener{
         mDateSpinner.adapter = dateAdapter
         dateAdapter.notifyDataSetChanged()
         mDateSpinner.setSelection(0) //Default value will be 1 always
-        // listner for selecting a date from adapter
-        mDateSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parentView: AdapterView<*>?,
-                selectedItemView: View,
-                position: Int,
-                id: Long
-            ) {
-                if (currentItem == position) {
-                    val datePickPosition = dateAdapter.getPosition(dateAdapter.getItem(0))
-                    mDateSpinner.setSelection(datePickPosition)
-                }
-                currentItem = position
-            }
-
-            override fun onNothingSelected(parentView: AdapterView<*>?) {}
-        }
     }
 
 
     private fun fillMonthSpinner() {
 
         // use default spinner item to show options in spinner
-        val monthPickAdapter: ArrayAdapter<String> =
-            ArrayAdapter<String>(requireActivity(), android.R.layout.simple_spinner_item, monthOptions)
+        val monthPickAdapter=
+            ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                monthOptions
+            )
         monthPickAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         mMonthSpinner.adapter = monthPickAdapter
         monthPickAdapter.notifyDataSetChanged()
         mMonthSpinner.setSelection(0) //default value will be Jan always
-        // listner for selecting a monthselected from adapter
-        mMonthSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parentView: AdapterView<*>?,
-                selectedItemView: View,
-                position: Int,
-                id: Long
-            ) {
-                if (currentItem == position) {
-                    val monthspinnerPosition =
-                        monthPickAdapter.getPosition(monthPickAdapter.getItem(0))
-                    mMonthSpinner.setSelection(monthspinnerPosition)
-                }
-                currentItem = position
-            }
-
-            override fun onNothingSelected(parentView: AdapterView<*>?) {}
-        }
     }
 
 
@@ -170,7 +143,6 @@ class UserDetails1 : Fragment() , View.OnClickListener{
         val previous50Year: String = java.lang.String.valueOf(DateFomatter.getPrevious50year())
         val initialYear: Int = DateFomatter.getPrevious120year()
         var currentYear: Int = Calendar.getInstance().get(Calendar.YEAR)
-        currentYear = currentYear - 1
 
         // use default spinner item to show options in spinner
         for (j in initialYear..currentYear) {
@@ -183,24 +155,6 @@ class UserDetails1 : Fragment() , View.OnClickListener{
         mYearSpinner.adapter = yearPickAdapter
         yearPickAdapter.notifyDataSetChanged()
         mYearSpinner.setSelection(previous50Year.toInt()) //default value will be 50 years lesser than current year always
-
-        // listner for selecting a yearselected from adapter
-        mYearSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parentView: AdapterView<*>?,
-                selectedItemView: View,
-                position: Int,
-                id: Long
-            ) {
-                if (currentYearItem == position) {
-                    val spinnerPosition = yearPickAdapter.getPosition(previous50Year)
-                    mYearSpinner.setSelection(spinnerPosition)
-                }
-                currentYearItem = position
-            }
-
-            override fun onNothingSelected(parentView: AdapterView<*>?) {}
-        }
     }
 
     private fun validate() : Boolean{
@@ -239,7 +193,17 @@ class UserDetails1 : Fragment() , View.OnClickListener{
                 } else {
                     context?.showToast("Wrong Date Input")
                 }
-                return false;
+                return false
+            }
+            val age = DateFomatter.getAge(
+                myearSelected.toInt(),
+                monthSelected.toString().toInt(),
+                day.toInt()
+            )
+
+            if (Integer.parseInt(age)<0){
+                context?.showToast("Please enter valid date")
+                return false
             }
         }
 
